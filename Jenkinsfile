@@ -1,5 +1,5 @@
 pipeline {
-    agent any // Correcto para el Reto 1; se distribuirá en agentes en el Reto 3 [2, 3]
+    agent any // Correcto para el Reto 1; se distribuirá en agentes en el Reto 3
 
     environment {
         STACK_NAME      = 'staging-listo-aws-master'
@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-        // 1. Etapa de obtención de código
+        // Primera Etapa de obtención de código
         stage('Get Code') {
             steps {
                 git branch: 'develop',
@@ -19,28 +19,41 @@ pipeline {
             }
         }
 
-        // 2. Etapa de Pruebas Estáticas [1]
+        // Segunda Etapa de Pruebas Estáticas
         stage('Static Test') {
             steps {
-                echo "Paso 2: Aquí ejecutaremos Flake8 y Bandit para analizar el código en /src y publicaremos los informes."
+                sh '''
+                    echo "=== Flake8 ==="
+                    flake8 src/ --format=pylint --output-file=flake8-report.txt || true
+        
+                    echo "=== Bandit ==="
+                    bandit -r src/ -f xml -o bandit-report.xml || true
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.xml',
+                                     allowEmptyArchive: true
+                }
             }
         }
 
-        // 3. Etapa de Despliegue con SAM [4]
+
+        // 3. Etapa de Despliegue con SAM
         stage('Deploy') {
             steps {
                 echo "Paso 3: Aquí utilizaremos comandos de AWS SAM para construir y desplegar en Staging de forma automática."
             }
         }
 
-        // 4. Etapa de Pruebas Rest (Integración) [5]
+        // 4. Etapa de Pruebas Rest (Integración)
         stage('Rest Test') {
             steps {
                 echo "Paso 4: Aquí ejecutaremos Pytest o comandos Curl para validar la API. Si falla, el pipeline se detendrá."
             }
         }
 
-        // 5. Etapa de Promoción [6]
+        // 5. Etapa de Promoción
         stage('Promote') {
             steps {
                 echo "Paso 5: Si todo ha sido exitoso, realizaremos el merge de la rama 'develop' a 'master' usando git."
