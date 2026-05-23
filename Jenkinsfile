@@ -32,6 +32,12 @@ pipeline {
             }
             post {
                 always {
+                    recordIssues(
+                        tools: [
+                            flake8(pattern: 'flake8-report.txt'),
+                            pyLint(pattern: 'bandit-report.xml')
+                        ]
+                    )
                     archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.xml',
                                      allowEmptyArchive: true
                 }
