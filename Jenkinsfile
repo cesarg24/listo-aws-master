@@ -20,31 +20,30 @@ pipeline {
         }
 
         // Segunda Etapa de Pruebas Estáticas
-       stage('Static Test') {
+        stage('Static Test') {
             steps {
                 sh '''
-                    echo === Flake8 ===
+                    echo "=== Flake8 ==="
                     flake8 src/ --output-file=flake8-report.txt || true
-                    
-                    echo === Bandit ===
-                    # Cambiamos el formato a 'txt' para que use el estándar parseable
-                    bandit -r src/ -f txt -o bandit.out || true
+        
+                    echo "=== Bandit ==="
+                    bandit -r src/ -f csv -o bandit-report.json || true
                 '''
             }
-           post {
+            post {
                 always {
                     recordIssues(
                         tools: [
                             flake8(pattern: 'flake8-report.txt'),
-                            // CAMBIO AQUÍ: Usar bandit() en lugar de pyLint()
-                            bandit(pattern: 'bandit-report.json')
+                            pyLint(pattern: 'bandit-report.json')
                         ]
                     )
                     archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
                                      allowEmptyArchive: true
                 }
             }
-        }
+        } 
+
 
         // 3. Etapa de Despliegue con SAM
         stage('Deploy') {
