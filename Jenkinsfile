@@ -20,20 +20,22 @@ pipeline {
         }
 
         // Segunda Etapa de Pruebas Estáticas
-        stage('Static Test') {
+       stage('Static Test') {
             steps {
                 sh '''
-                    echo "=== Flake8 ==="
+                    echo === Flake8 ===
                     flake8 src/ --output-file=flake8-report.txt || true
-        
-                    echo "=== Bandit ==="
-                    bandit -r src/ -f json -o bandit-report.json || true
+                    
+                    echo === Bandit ===
+                    # Cambiamos el formato a 'txt' para que use el estándar parseable
+                    bandit -r src/ -f txt -o bandit.out || true
                 '''
             }
-         post {
+            post {
                 always {
                     recordIssues(
                         tools: [
+                            // El lector de PyLint procesará perfectamente el formato txt nativo de Bandit
                             pyLint(name: 'Bandit', pattern: 'bandit.out'),
                             flake8(pattern: 'flake8-report.txt')
                         ], 
@@ -44,8 +46,7 @@ pipeline {
                     )
                 }
             }
-            
-        } 
+        }
 
         // 3. Etapa de Despliegue con SAM
         stage('Deploy') {
