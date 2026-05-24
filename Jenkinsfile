@@ -30,12 +30,13 @@ pipeline {
                     bandit -r src/ -f json -o bandit-report.json || true
                 '''
             }
-            post {
+           post {
                 always {
+                    //Usar el motor 'bandit'
                     recordIssues(
                         tools: [
                             flake8(pattern: 'flake8-report.txt'),
-                            pyLint(pattern: 'bandit-report.json')
+                            bandit(pattern: 'bandit-report.json')
                         ]
                     )
                     archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
