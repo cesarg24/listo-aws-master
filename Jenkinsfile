@@ -30,13 +30,16 @@ pipeline {
                     bandit -r src/ -f json -o bandit-report.json || true
                 '''
             }
-          post {
+         post {
                 always {
-              // Usando recordIssues
                     recordIssues(
                         tools: [
-                            bandit(pattern: 'bandit-report.json'),
+                            pyLint(name: 'Bandit', pattern: 'bandit.out'),
                             flake8(pattern: 'flake8-report.txt')
+                        ], 
+                        qualityGates: [
+                            [threshold: 2, type: 'TOTAL', unstable: true], 
+                            [threshold: 4, type: 'TOTAL', unstable: false]
                         ]
                     )
                 }
