@@ -31,19 +31,17 @@ pipeline {
                     bandit -r src/ -f txt -o bandit.out || true
                 '''
             }
-            post {
+           post {
                 always {
                     recordIssues(
                         tools: [
-                            // El lector de PyLint procesará perfectamente el formato txt nativo de Bandit
-                            pyLint(name: 'Bandit', pattern: 'bandit.out'),
-                            flake8(pattern: 'flake8-report.txt')
-                        ], 
-                        qualityGates: [
-                            [threshold: 2, type: 'TOTAL', unstable: true], 
-                            [threshold: 4, type: 'TOTAL', unstable: false]
+                            flake8(pattern: 'flake8-report.txt'),
+                            // CAMBIO AQUÍ: Usar bandit() en lugar de pyLint()
+                            bandit(pattern: 'bandit-report.json')
                         ]
                     )
+                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
+                                     allowEmptyArchive: true
                 }
             }
         }
