@@ -27,18 +27,22 @@ pipeline {
                     flake8 src/ --output-file=flake8-report.txt || true
         
                     echo "=== Bandit ==="
-                    bandit -r src/ -f json -o bandit-report.json || true
+                    bandit -r src/ -f csv -o bandit-report.json || true
                 '''
             }
             post {
                 always {
-                   recordIssues(tools: [flake8(pattern: 'flake8-report.txt')])
-                   archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
-                             allowEmptyArchive: true
+                    recordIssues(
+                        tools: [
+                            flake8(pattern: 'flake8-report.txt'),
+                            pyLint(pattern: 'bandit-report.json')
+                        ]
+                    )
+                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
+                                     allowEmptyArchive: true
                 }
             }
-        }
-
+        } 
 
         // 3. Etapa de Despliegue con SAM
         stage('Deploy') {
