@@ -27,7 +27,7 @@ pipeline {
                     flake8 src/ --output-file=flake8-report.txt || true
         
                     echo "=== Bandit ==="
-                    bandit -r src/ -f csv -o bandit-report.json || true
+                    bandit -r src/ -f json -o bandit-report.json || true
                 '''
             }
             post {
