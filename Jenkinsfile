@@ -30,19 +30,19 @@ pipeline {
                     bandit -r src/ -f json -o bandit-report.json || true
                 '''
             }
-           post {
+          post {
                 always {
-                    //Usar el motor 'bandit'
+                    // Usamos recordIssues del plugin Warnings NG para Bandit y Flake8
                     recordIssues(
                         tools: [
                             flake8(pattern: 'flake8-report.txt'),
                             bandit(pattern: 'bandit-report.json')
-                        ]
+                        ],
+                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
                     )
-                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
-                                     allowEmptyArchive: true
                 }
             }
+            
         } 
 
         // 3. Etapa de Despliegue con SAM
