@@ -30,18 +30,14 @@ pipeline {
                     bandit -r src/ -f csv -o bandit-report.csv || true
                 '''
             }
-           post {
-                always {
-                    recordIssues(
-                        tools: [
-                            flake8(pattern: 'flake8-report.txt'),
-                            pep8(pattern: 'bandit-report.csv')
-                        ]
-                    )
-                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.csv',
-                                     allowEmptyArchive: true
+            post {
+                    always {
+                        recordIssues(tools: [flake8(pattern: 'flake8-report.txt')])
+                        recordIssues(tool: pyLint(name: 'Bandit Security', pattern: 'bandit.out'))
+                        archiveArtifacts artifacts: 'flake8-report.txt, bandit.out',
+                                         allowEmptyArchive: true
+                    }
                 }
-            }
         }
 
 
