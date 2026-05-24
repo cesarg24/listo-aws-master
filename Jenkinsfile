@@ -23,26 +23,27 @@ pipeline {
         stage('Static Test') {
             steps {
                 sh '''
-                    echo "=== Flake8 ==="
-                    flake8 src/ --output-file=flake8-report.txt || true
+                    # Instalación de herramientas en el venv
+                    ./venv/bin/python3 -m pip install flake8 bandit
         
-                    echo "=== Bandit ==="
-                    bandit -r src/ -f csv -o bandit-report.json || true
+                    echo "=== Ejecutando Flake8 ==="
+                    # Flake8 sobre /src (requisito obligatorio)
+                    ./venv/bin/python3 -m flake8 src/ --format=pylint --output-file=flake8.out || true
+        
+                    echo "=== Ejecutando Bandit ==="
+                    # Bandit sobre /src con tu template personalizado
+                    ./venv/bin/python3 -m bandit -r src/ --msg-template "{abspath}:{line}: [{severity}] {test_id}: {msg}" -f custom -o bandit.out || true
                 '''
+                
+                // Publicación de ambos informes para cumplir con el reto
+                recordIssues(
+                    tools: [
+                        pyLint(name: 'Flake8 Style', pattern: 'flake8.out'),
+                        pyLint(name: 'Bandit Security', pattern: 'bandit.out')
+                    ]
+                )
             }
-            post {
-                always {
-                    recordIssues(
-                        tools: [
-                            flake8(pattern: 'flake8-report.txt'),
-                            pyLint(pattern: 'bandit-report.json')
-                        ]
-                    )
-                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.json',
-                                     allowEmptyArchive: true
-                }
-            }
-        } 
+        }
 
 
         // 3. Etapa de Despliegue con SAM
