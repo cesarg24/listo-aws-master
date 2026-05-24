@@ -24,15 +24,19 @@ pipeline {
             steps {
                 sh '''
                     echo "=== Ejecutando Flake8 ==="
-                    flake8 src/ --format=pylint --output-file=flake8.out || true
-        
+                    # Usamos el formato estándar para que el plugin nativo lo reconozca
+                    flake8 src/ --output-file=flake8-report.txt || true
+
                     echo "=== Ejecutando Bandit ==="
-                    bandit -r src/ --msg-template "{abspath}:{line}: [{severity}] {test_id}: {msg}" -f custom -o bandit.out || true
+                    # Configuración para Bandit
+                    bandit -r src/ --msg-template "{abspath}:{line}: [{severity}] {test_id}: {msg}" -f custom -o bandit-report.out || true
                 '''
+
+                // Publicamos ambos con sus herramientas específicas para que salgan en el menú
                 recordIssues(
                     tools: [
-                        pyLint(name: 'Flake8 Style', pattern: 'flake8.out'),
-                        pyLint(name: 'Bandit Security', pattern: 'bandit.out')
+                        flake8(name: 'Flake8 Style', pattern: 'flake8-report.txt'),
+                        pyLint(name: 'Bandit Security', pattern: 'bandit-report.out')
                     ]
                 )
             }
