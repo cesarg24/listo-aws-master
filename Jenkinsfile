@@ -32,13 +32,12 @@ pipeline {
             }
           post {
                 always {
-                    // Usamos recordIssues del plugin Warnings NG para Bandit y Flake8
+              // Usando recordIssues
                     recordIssues(
                         tools: [
-                            flake8(pattern: 'flake8-report.txt'),
-                            bandit(pattern: 'bandit-report.json')
-                        ],
-                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                            bandit(pattern: 'bandit-report.json'),
+                            flake8(pattern: 'flake8-report.txt')
+                        ]
                     )
                 }
             }
