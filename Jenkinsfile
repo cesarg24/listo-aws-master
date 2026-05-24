@@ -27,17 +27,17 @@ pipeline {
                     flake8 src/ --output-file=flake8-report.txt || true
         
                     echo "=== Bandit ==="
-                    bandit -r src/ -f csv -o bandit-report.csv || true
+                    bandit -r src/ -f txt -o bandit.out || true
                 '''
             }
             post {
-                    always {
-                        recordIssues(tools: [flake8(pattern: 'flake8-report.txt')])
-                        recordIssues(tool: pyLint(name: 'Bandit Security', pattern: 'bandit.out'))
-                        archiveArtifacts artifacts: 'flake8-report.txt, bandit.out',
-                                         allowEmptyArchive: true
-                    }
+                always {
+                    recordIssues(tools: [flake8(pattern: 'flake8-report.txt')])
+                    recordIssues(tool: pyLint(name: 'Bandit Security', pattern: 'bandit.out'))
+                    archiveArtifacts artifacts: 'flake8-report.txt, bandit.out',
+                                     allowEmptyArchive: true
                 }
+            }
         }
 
 
