@@ -30,16 +30,24 @@ pipeline {
                     bandit -r src/ -f csv -o bandit-report.csv || true
                 '''
             }
-            post {
+           post {
                 always {
+                    // Publicación visual para Flake8
                     recordIssues(
-                        tools: [
-                            flake8(pattern: 'flake8-report.txt'),
-                            pyLint(pattern: 'bandit-report.csv')
-                        ]
+                        enabledForFailure: true, 
+                        tool: flake8(pattern: 'flake8-report.txt'),
+                        name: 'Flake8 Warnings'
                     )
-                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.csv',
-                                     allowEmptyArchive: true
+        
+                    // Publicación visual para Bandit (esto habilitará el menú que falta)
+                    recordIssues(
+                        enabledForFailure: true, 
+                        tool: bandit(pattern: 'bandit-report.xml'),
+                        name: 'Bandit Security Issues'
+                    )
+                    
+                    // Mantenemos esto por seguridad para que los archivos sean descargables
+                    archiveArtifacts artifacts: 'flake8-report.txt, bandit-report.xml', allowEmptyArchive: true
                 }
             }
         }
