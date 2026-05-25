@@ -43,7 +43,7 @@ pipeline {
         }
 
 
-        // 3. Etapa de Despliegue con SAM
+        // Tercera. Etapa de Despliegue con SAM
        stage('Deploy') {
             steps {
                 sh '''
@@ -59,10 +59,22 @@ pipeline {
             }
         }
 
-        // 4. Etapa de Pruebas Rest (Integración)
-        stage('Rest Test') {
+        // Cuarta. Etapa de Pruebas Rest (Integración)
+       stage('Rest Test') {
             steps {
-                echo "Paso 4: Aquí ejecutaremos Pytest o comandos Curl para validar la API. Si falla, el pipeline se detendrá."
+                sh '''
+                    echo "=== Obteniendo la URL de la API ==="
+                    API_URL=$(aws cloudformation describe-stacks \
+                        --stack-name todo-list-aws-staging \
+                        --region us-east-1 \
+                        --query "Stacks[0].Outputs[?OutputKey==\\'BaseUrlApi\\'].OutputValue" \
+                        --output text)
+        
+                    echo "API URL: ${API_URL}"
+        
+                    echo "=== Ejecutando las Pruebas de Integración ==="
+                    BASE_URL=${API_URL} pytest test/integration/todoApiTest.py -v --tb=short
+                '''
             }
         }
 
