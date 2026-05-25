@@ -16,7 +16,6 @@ capabilities = "CAPABILITY_IAM"
 parameter_overrides = "Stage=\"staging\""
 confirm_changeset = false
 fail_on_empty_changeset = false
-resolve_s3 = true
 
 [production.deploy.parameters]
 stack_name = "todo-list-aws-production"
