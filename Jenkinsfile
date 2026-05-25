@@ -78,10 +78,24 @@ pipeline {
             }
         }
 
-        // 5. Etapa de Promoción
-        stage('Promote') {
+        // Quinta Etapa de Promoción
+       stage('Promote') {
             steps {
-                echo "Paso 5: Si todo ha sido exitoso, realizaremos el merge de la rama 'develop' a 'master' usando git."
+                withCredentials([usernamePassword(
+                    credentialsId: env.GIT_CREDENTIALS,
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+                    sh '''
+                        echo "=== Merge develop → master ==="
+                        git config user.email "jenkins@ci.local"
+                        git config user.name "Jenkins CI"
+        
+                        git checkout master
+                        git merge develop
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git master
+                    '''
+                }
             }
         }
     }
