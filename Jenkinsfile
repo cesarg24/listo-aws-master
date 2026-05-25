@@ -87,7 +87,7 @@ pipeline {
                     passwordVariable: 'GIT_PASS'
                 )]) {
                     sh '''
-                        echo "=== Merge develop → main ==="
+                        echo "=== Merge develop → main probando==="
                         git config user.email "jenkins@ci.local"
                         git config user.name "Jenkins CI"
         
