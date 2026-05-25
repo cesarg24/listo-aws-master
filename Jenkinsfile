@@ -5,7 +5,7 @@ pipeline {
         STACK_NAME      = 'staging-listo-aws-master'
         REGION          = 'us-east-1'
         S3_BUCKET       = 'pruebacesarg'
-        REPO_URL        = 'https://github.com/cesarg24/listo-aws-master.git'
+        REPO_URL        = 'https://github.com/cesarg24/todo-list-aws.git'
         GIT_CREDENTIALS = 'github-credentials-id'
     }
 
