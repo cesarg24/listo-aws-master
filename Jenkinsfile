@@ -46,7 +46,16 @@ pipeline {
         // 3. Etapa de Despliegue con SAM
         stage('Deploy') {
             steps {
-                echo "Paso 3: Aquí utilizaremos comandos de AWS SAM para construir y desplegar en Staging de forma automática."
+                sh '''
+                    echo "=== Iniciando SAM Build ==="
+                    # Prepara el código y las dependencias según la plantilla
+                    sam build
+        
+                    echo "=== Desplegando en STAGING ==="
+                    # Se usa el entorno staging definido en samconfig.toml
+                    # Los flags aseguran que el proceso sea 100% automatizado
+                    sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
+                '''
             }
         }
 
