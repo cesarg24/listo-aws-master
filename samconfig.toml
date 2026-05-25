@@ -9,13 +9,13 @@ confirm_changeset = false
 
 [staging.deploy.parameters]
 stack_name = "todo-list-aws-staging"
-s3_bucket = "aws-sam-cli-managed-staging-samclisourcebucket-upt09go84tay"
 s3_prefix = "todo-list-aws-staging"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 parameter_overrides = "Stage=\"staging\""
 confirm_changeset = false
 fail_on_empty_changeset = false
+resolve_s3 = true
 
 [production.deploy.parameters]
 stack_name = "todo-list-aws-production"
