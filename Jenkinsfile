@@ -79,7 +79,7 @@ pipeline {
         }
 
         // Quinta Etapa de Promoción
-       stage('Promote') {
+     stage('Promote') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: env.GIT_CREDENTIALS,
@@ -87,13 +87,14 @@ pipeline {
                     passwordVariable: 'GIT_PASS'
                 )]) {
                     sh '''
-                        echo "=== Merge develop → master ==="
+                        echo "=== Merge develop → main ==="
                         git config user.email "jenkins@ci.local"
                         git config user.name "Jenkins CI"
         
-                        git checkout master
+                        git fetch origin main
+                        git checkout -b main origin/main
                         git merge develop
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git master
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git main
                     '''
                 }
             }
