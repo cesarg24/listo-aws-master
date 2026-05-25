@@ -60,14 +60,14 @@ pipeline {
         }
 
         // Cuarta. Etapa de Pruebas Rest (Integración)
-       stage('Rest Test') {
+      stage('Rest Test') {
             steps {
                 sh '''
                     echo "=== Obteniendo la URL de la API ==="
                     API_URL=$(aws cloudformation describe-stacks \
                         --stack-name todo-list-aws-staging \
                         --region us-east-1 \
-                        --query "Stacks[0].Outputs[?OutputKey==\\'BaseUrlApi\\'].OutputValue" \
+                        --query "Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue" \
                         --output text)
         
                     echo "API URL: ${API_URL}"
