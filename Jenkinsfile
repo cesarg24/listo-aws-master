@@ -44,17 +44,17 @@ pipeline {
 
 
         // 3. Etapa de Despliegue con SAM
-        stage('Deploy') {
+       stage('Deploy') {
             steps {
                 sh '''
-                    echo "=== Iniciando SAM Build ==="
-                    # Prepara el código y las dependencias según la plantilla
+                    echo "=== SAM Build ==="
                     sam build
         
-                    echo "=== Desplegando en STAGING ==="
-                    # Se usa el entorno staging definido en samconfig.toml
-                    # Los flags aseguran que el proceso sea 100% automatizado
-                    sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
+                    echo "=== SAM Validate ==="
+                    sam validate --region us-east-1
+        
+                    echo "=== SAM Deploy Staging ==="
+                    sam deploy --config-env staging --resolve-s3
                 '''
             }
         }
