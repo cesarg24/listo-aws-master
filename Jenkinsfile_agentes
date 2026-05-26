@@ -1,0 +1,101 @@
+pipeline {
+    agent { label 'principal' }
+
+    environment {
+        STACK_NAME      = 'todo-list-aws-staging'
+        REGION          = 'us-east-1'
+        REPO_URL        = 'https://github.com/cesarg24/todo-list-aws.git'
+        GIT_CREDENTIALS = 'github-credentials-id'
+    }
+
+    stages {
+
+        stage('Get Code') {
+            steps {
+                sh 'whoami && hostname'
+                git branch: 'develop',
+                    credentialsId: env.GIT_CREDENTIALS,
+                    url: env.REPO_URL
+            }
+        }
+
+        stage('Static Test') {
+            agent { label 'agente1' }
+            steps {
+                sh 'whoami && hostname'
+                sh '''
+                    echo "=== Ejecutando Flake8 ==="
+                    flake8 src/ --output-file=flake8-report.txt || true
+
+                    echo "=== Ejecutando Bandit ==="
+                    bandit -r src/ --msg-template "{abspath}:{line}: [{severity}] {test_id}: {msg}" -f custom -o bandit-report.out || true
+                '''
+                recordIssues(
+                    tools: [
+                        flake8(name: 'Flake8 Style', pattern: 'flake8-report.txt'),
+                        pyLint(name: 'Bandit Security', pattern: 'bandit-report.out')
+                    ]
+                )
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'whoami && hostname'
+                sh '''
+                    echo "=== SAM Build ==="
+                    sam build
+
+                    echo "=== SAM Validate ==="
+                    sam validate --region us-east-1
+
+                    echo "=== SAM Deploy Staging ==="
+                    sam deploy --config-env staging --resolve-s3
+                '''
+            }
+        }
+
+        stage('Rest Test') {
+            agent { label 'agente2' }
+            steps {
+                sh 'whoami && hostname'
+                sh '''
+                    echo "=== Obteniendo la URL de la API ==="
+                    API_URL=$(aws cloudformation describe-stacks \
+                        --stack-name todo-list-aws-staging \
+                        --region us-east-1 \
+                        --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' \
+                        --output text)
+
+                    echo "API URL: ${API_URL}"
+
+                    echo "=== Ejecutando Pruebas de Integración ==="
+                    BASE_URL=${API_URL} pytest test/integration/todoApiTest.py -v --tb=short
+                '''
+            }
+        }
+
+        stage('Promote') {
+            steps {
+                sh 'whoami && hostname'
+                withCredentials([usernamePassword(
+                    credentialsId: env.GIT_CREDENTIALS,
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+                    sh '''
+                        echo "=== Merge develop → main ==="
+                        git config user.email "jenkins@ci.local"
+                        git config user.name "Jenkins CI"
+
+                        git fetch origin main
+                        git checkout -b main origin/main
+                        git merge develop
+                        git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git main
+                    '''
+                }
+            }
+        }
+
+    }
+}
