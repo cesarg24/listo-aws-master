@@ -16,7 +16,15 @@ pipeline {
                 git branch: 'develop',
                     credentialsId: env.GIT_CREDENTIALS,
                     url: env.REPO_URL
-            }
+                              
+                sh '''
+                    echo "=== Descargando configuración de Staging ==="
+                    wget https://raw.githubusercontent.com/cesarg24/todo-list-aws-config/staging/samconfig.toml \
+                    -O samconfig.toml
+                    echo "=== Contenido del samconfig.toml ==="
+                    cat samconfig.toml
+                '''
+	    }
         }
 
         // Segunda Etapa de Pruebas Estáticas
