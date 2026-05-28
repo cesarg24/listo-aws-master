@@ -98,10 +98,11 @@ pipeline {
                         echo "=== Merge develop → main probando==="
                         git config user.email "jenkins@ci.local"
                         git config user.name "Jenkins CI"
-        
+                        
+                        git stash        
                         git fetch origin main
                         git checkout -b main origin/main
-                        git merge develop
+                        git merge develop -X ours
                         git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git main
                     '''
                 }
