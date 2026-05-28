@@ -15,6 +15,19 @@ pipeline {
                 git branch: 'main',
                     credentialsId: env.GIT_CREDENTIALS,
                     url: env.REPO_URL
+		sh '''
+                    echo "=== Descargando configuración de Production ==="
+                    wget https://raw.githubusercontent.com/cesarg24/todo-list-aws-config/production/samconfig.toml \
+                    -O samconfig.toml
+                    echo "=== Contenido del samconfig.toml ==="
+                    cat samconfig.toml
+                 '''
+
+
+
+
+
+
             }
         }
 
