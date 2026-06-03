@@ -36,6 +36,9 @@ pipeline {
         stage('Unit Test & Coverage') {
             steps {
                 sh '''
+                    # Forzamos la inclusión de la ruta local en el PATH para Jenkins
+                    export PATH=$PATH:/home/ubuntu/.local/bin
+                    
                     coverage run --branch --source=src -m pytest test/unit/ --junitxml=result-unit.xml
                     coverage xml -o coverage.xml
                     coverage report
