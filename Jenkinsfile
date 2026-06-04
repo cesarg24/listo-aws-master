@@ -5,6 +5,7 @@ pipeline {
         STACK_NAME      = 'todo-list-aws-production'
         REGION          = 'us-east-1'
         REPO_URL        = 'https://github.com/cesarg24/todo-list-aws.git'
+        DYNAMODB_TABLE = 'todo-list-aws-staging'
         GIT_CREDENTIALS = 'github-credentials-id'
     }
 
