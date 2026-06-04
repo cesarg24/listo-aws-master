@@ -42,8 +42,12 @@ pipeline {
                     python3-coverage xml -o coverage.xml
                     python3-coverage report 
                 '''
-                junit 'result-unit.xml'
-            }
+                post{
+		    always{
+                      junit 'result-unit.xml'
+                   }
+                 }  
+	     }
         }
 
         // Reto 1: Despliegue en Staging
