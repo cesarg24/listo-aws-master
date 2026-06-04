@@ -58,17 +58,26 @@ pipeline {
         }
 
         // Reto 1: Pruebas de Integración (Rest Test)
-        stage('Rest Test') {
-            steps {
-                sh '''
-                 echo "=== Obteniendo la URL de la API ==="
-		 API_URL=$(aws cloudformation describe-stacks --stack-name todo-list-aws-staging --region us-east-1 --query "Stacks[0].Outputs[?OutputKey==\\"BaseUrlApi\\"].OutputValue" --output text)
-		 echo "API URL: ${API_URL}"
-		 echo "=== Ejecutando Pruebas de Integración ==="
-		 BASE_URL=${API_URL} pytest test/integration/todoApiTest.py -v --tb=short   
-                '''
-            }
-        }
+	stage('Rest Test') {
+	    steps {
+	        script {
+	            def apiUrl = sh(
+	                script: '''aws cloudformation describe-stacks \
+	                    --stack-name todo-list-aws-staging \
+	                    --region us-east-1 \
+	                    --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' \
+	                    --output text''',
+	                returnStdout: true
+	            ).trim()
+
+	            echo "API URL: ${apiUrl}"
+
+	            sh """
+	                BASE_URL=${apiUrl} pytest test/integration/todoApiTest.py -v --tb=short
+	            """
+	        }
+	    }
+	}
 
         // Reto 1: Promoción (Merge automático a Main)
         stage('Promote') {
