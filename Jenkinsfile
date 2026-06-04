@@ -61,8 +61,11 @@ pipeline {
         stage('Rest Test') {
             steps {
                 sh '''
-                    API_URL=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME} --region ${REGION} --query 'Stacks.Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --output text)
-                    BASE_URL=${API_URL} pytest test/integration/todoApiTest.py -v --tb=short
+                 echo "=== Obteniendo la URL de la API ==="
+		 API_URL=$(aws cloudformation describe-stacks --stack-name todo-list-aws-staging --region us-east-1 --query "Stacks[0].Outputs[?OutputKey==\\"BaseUrlApi\\"].OutputValue" --output text)
+		 echo "API URL: ${API_URL}"
+		 echo "=== Ejecutando Pruebas de Integración ==="
+		 BASE_URL=${API_URL} pytest test/integration/todoApiTest.py -v --tb=short   
                 '''
             }
         }
