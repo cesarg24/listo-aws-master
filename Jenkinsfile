@@ -80,21 +80,28 @@ pipeline {
 	}
 
         // Reto 1: Promoción (Merge automático a Main)
-        stage('Promote') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                    sh '''
-                        git config user.email "jenkins@ci.local"
-                        git config user.name "Jenkins CI"
-                        git fetch origin main
-                        git checkout main || git checkout -b main origin/main
-                        git merge develop -X ours
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git main
-                    '''
-                }
-            }
-        }
-    }
+	stage('Promote') {
+	    steps {
+	        withCredentials([usernamePassword(
+	            credentialsId: env.GIT_CREDENTIALS,
+	            usernameVariable: 'GIT_USER',
+	            passwordVariable: 'GIT_PASS'
+	        )]) {
+	            sh '''
+	                echo "=== Merge develop → main ==="
+	                git config user.email "jenkins@ci.local"
+	                git config user.name "Jenkins CI"
+
+	                git stash || true
+	                git fetch origin main
+	                git checkout -b main origin/main || git checkout main
+	                git merge develop -X ours
+	                git push https://${GIT_USER}:${GIT_PASS}@github.com/cesarg24/todo-list-aws.git main
+	            '''
+	        }
+	    }
+	}
+  }
 
     post {
         always {
